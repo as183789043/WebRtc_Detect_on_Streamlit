@@ -24,9 +24,10 @@ def webcam_input():
         return av.VideoFrame.from_ndarray(image, format="bgr24")
     
     ctx = webrtc_streamer(
-    key="neural-style-transfer",
-    video_frame_callback=video_frame_callback,
-)
+        key="neural-style-transfer",
+        video_frame_callback=video_frame_callback,
+        media_stream_constraints={"video": True, "audio": False},
+    )
 
 
 st.sidebar.title("Get permission about Web Camera ")
