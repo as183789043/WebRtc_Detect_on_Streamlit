@@ -1,6 +1,7 @@
 import streamlit  as st
 import av
 from streamlit_webrtc import webrtc_streamer
+from turn import get_ice_servers
 
 def webcam_input():
     st.header("Webcam Live Feed")
@@ -26,6 +27,7 @@ def webcam_input():
     ctx = webrtc_streamer(
         key="neural-style-transfer",
         video_frame_callback=video_frame_callback,
+        rtc_configuration={"iceServers": get_ice_servers()},
         media_stream_constraints={"video": True, "audio": False},
     )
 
