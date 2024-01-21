@@ -3,7 +3,6 @@ import cv2
 import streamlit as st
 import av 
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode,RTCConfiguration
-from streamlit_player import st_player
 from ultralytics import YOLO
 from helper import video_frame_callback
 from turn import get_ice_servers
