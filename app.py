@@ -3,7 +3,6 @@ import cv2
 import streamlit as st
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode,RTCConfiguration
 from ultralytics import YOLO
-from helper import video_frame_callback  as video_process
 from turn import get_ice_servers
 from pytube import YouTube
 
@@ -21,6 +20,14 @@ def load_model():
     return YOLO("yolov8n.pt")
 
 model=load_model()
+
+def video_frame_callback(frame):
+    img = frame.to_ndarray(format="bgr24")
+    results = model(img)
+    annotated_frame = results[0].plot()
+
+    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
+
 
 if  option=="Image":
     Image=st.sidebar.file_uploader("上傳圖片進行物件辨識",type=['png', 'jpg'])
