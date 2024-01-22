@@ -20,7 +20,14 @@ with st.sidebar:
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
+#test
+def video_frame_callback(frame):
+    img = frame.to_ndarray(format="bgr24")
+    results = model(img)
+    annotated_frame = results[0].plot()
 
+    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
+# test end
 model=load_model()
 
 if  option=="Image":
