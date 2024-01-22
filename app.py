@@ -69,6 +69,7 @@ if option=="Webcam":
         ctx = webrtc_streamer(key="example",      
                 mode=WebRtcMode.SENDRECV,
                 rtc_configuration={"iceServers": get_ice_servers()},
+                media_stream_constraints={"video": True, "audio": False},
                 video_frame_callback=video_frame_callback,
                 async_processing=True,)
 
