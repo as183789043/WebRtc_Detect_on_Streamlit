@@ -4,9 +4,10 @@ import streamlit as st
 from streamlit_webrtc import webrtc_streamer,WebRtcMode
 from ultralytics import YOLO
 from pytube import YouTube
-
+from PIL import Image
+import numpy as np
 # other file
-from helper import video_frame_callback,load_model
+from helper import video_frame_callback,load_model,image_process
 from turn import get_ice_servers
 
 
@@ -32,14 +33,14 @@ if  option=="Image":
     elif buttom and Image:
         col1, col2, = st.columns(2)
         with col1:
-            st.image(Image.getvalue(),caption="原圖")
+            st.image(Image,caption="原圖")
 
         with col2:
-            st.image(Image.getvalue(),caption="未進行辨識(佔位)")
+            st.image(image_process(Image,model_name),caption="辨識結果")
 
 
     elif Image :
-        st.image(Image.getvalue(),caption="原圖檢查")
+        st.image(Image,caption="原圖檢查")
 
 
 
