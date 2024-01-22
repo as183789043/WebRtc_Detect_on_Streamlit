@@ -1,10 +1,15 @@
-import av
+
 import cv2
 import streamlit as st
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode,RTCConfiguration
+from streamlit_webrtc import webrtc_streamer,WebRtcMode
 from ultralytics import YOLO
-from turn import get_ice_servers
 from pytube import YouTube
+
+# other file
+from helper import video_frame_callback
+from turn import get_ice_servers
+
+
 
 with st.sidebar:
     st.title("Object Detect Base on YOLO8")
@@ -18,15 +23,6 @@ with st.sidebar:
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
-
-model=load_model()
-
-def video_frame_callback(frame):
-    img = frame.to_ndarray(format="bgr24")
-    results = model(img)
-    annotated_frame = results[0].plot()
-
-    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
 
 
 if  option=="Image":
@@ -68,6 +64,7 @@ if  option=="Video":
         st.video(Video)
 
 if option=="Webcam":
+    model=load_model()
     warning = st.sidebar.warning("串流辨識因網速不同而有差異")
     check = st.sidebar.checkbox("瞭解上述提醒")
 
@@ -75,7 +72,6 @@ if option=="Webcam":
         ctx = webrtc_streamer(key="example",      
                 mode=WebRtcMode.SENDRECV,
                 rtc_configuration={"iceServers": get_ice_servers()},
-                media_stream_constraints={"video": True, "audio": False},
                 video_frame_callback=video_frame_callback,
                 async_processing=True,)
 
