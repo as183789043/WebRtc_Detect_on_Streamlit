@@ -76,7 +76,7 @@ if option=="Webcam":
                 mode=WebRtcMode.SENDRECV,
                 rtc_configuration={"iceServers": get_ice_servers()},
                 media_stream_constraints={"video": True, "audio": False},
-                video_frame_callback=video_process,
+                video_frame_callback=video_frame_callback,
                 async_processing=True,)
 
 
