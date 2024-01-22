@@ -6,23 +6,20 @@ from ultralytics import YOLO
 from pytube import YouTube
 
 # other file
-from helper import video_frame_callback
+from helper import video_frame_callback,load_model
 from turn import get_ice_servers
 
 
 
 with st.sidebar:
     st.title("Object Detect Base on YOLO8")
-    st.selectbox("推論模型",options=["yolov8n.pt"],index=0
+    model_name=st.selectbox("推論模型",options=["yolov8n.pt"],index=0
     )
 
     option = st.radio(label="Detect Mode",
     options=["Image","Video","Webcam","RTSP","Youtube"])
 
 
-@st.cache_resource
-def load_model():
-    return YOLO("yolov8n.pt")
 
 
 if  option=="Image":
@@ -64,7 +61,6 @@ if  option=="Video":
         st.video(Video)
 
 if option=="Webcam":
-    model=load_model()
     warning = st.sidebar.warning("串流辨識因網速不同而有差異")
     check = st.sidebar.checkbox("瞭解上述提醒")
 
@@ -72,7 +68,8 @@ if option=="Webcam":
         ctx = webrtc_streamer(key="example",      
                 mode=WebRtcMode.SENDRECV,
                 rtc_configuration={"iceServers": get_ice_servers()},
-                video_frame_callback=video_frame_callback,
+                video_frame_callback=lambda frame: video_frame_callback(frame, model_name),
+                media_stream_constraints={"video": True, "audio": False},
                 async_processing=True,)
 
 
