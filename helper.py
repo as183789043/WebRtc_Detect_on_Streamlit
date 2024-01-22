@@ -1,3 +1,4 @@
+import av
 def video_frame_callback(frame):
     img = frame.to_ndarray(format="bgr24")
     results = model(img)
