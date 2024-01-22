@@ -4,7 +4,7 @@ import streamlit as st
 import av 
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer,WebRtcMode,RTCConfiguration
 from ultralytics import YOLO
-# from helper import video_frame_callback
+from helper import video_frame_callback  as video_process
 from turn import get_ice_servers
 from pytube import YouTube
 
@@ -20,14 +20,7 @@ with st.sidebar:
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
-#test
-def video_frame_callback(frame):
-    img = frame.to_ndarray(format="bgr24")
-    results = model(img)
-    annotated_frame = results[0].plot()
 
-    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
-# test end
 model=load_model()
 
 if  option=="Image":
@@ -77,7 +70,7 @@ if option=="Webcam":
                 mode=WebRtcMode.SENDRECV,
                 rtc_configuration={"iceServers": get_ice_servers()},
                 media_stream_constraints={"video": True, "audio": False},
-                video_frame_callback=video_frame_callback,
+                video_frame_callback=video_process,
                 async_processing=True,)
 
 
