@@ -1,16 +1,13 @@
-
 import cv2
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer,WebRtcMode
 from ultralytics import YOLO
-from pytube import YouTube
+from pytubefix import YouTube
 from PIL import Image
-import numpy as np
 # other file
-from helper import video_frame_callback,load_model,image_process
+from helper import *
 from turn import get_ice_servers
-
-
+from streamlit_player import st_player
 
 with st.sidebar:
     st.title("Object Detect Base on YOLO8")
@@ -31,11 +28,7 @@ if  option=="Image":
         st.toast('要先上傳圖片才能辨識喔!')
 
     elif buttom and Image:
-        col1, col2, = st.columns(2)
-        with col1:
             st.image(Image,caption="原圖")
-
-        with col2:
             st.image(image_process(Image,model_name),caption="辨識結果")
 
 
@@ -47,15 +40,30 @@ if  option=="Image":
 if  option=="Video":
     Video=st.sidebar.file_uploader("上傳影片進行物件辨識", type=["mp4", "mpeg"])
     buttom=st.sidebar.button("進行影片辨識")
-    
+    # Open the video file
+
+
     if buttom==1 and Video==None:
         st.toast('要先上傳影片才能辨識喔!')
 
     elif buttom and Video:
         st.subheader("原影片")
         st.video(Video)
-        st.subheader("未辨識(佔位)")
-        st.video(Video)
+        st.subheader("影片辨識結果")
+
+        tfile =video_to_tempfile(Video)
+        vf = cv2.VideoCapture(tfile.name)
+
+        stframe = st.empty()
+        while vf.isOpened():
+            ret, frame = vf.read()
+            # if frame is read correctly ret is True
+            if not ret:
+                vf.release()
+                stframe.empty()
+            else:
+                annotated_frame = predict_every_frame(model_name,frame)
+                stframe.image(annotated_frame)
 
     elif Video:
         st.subheader("原影片")
@@ -75,15 +83,50 @@ if option=="Webcam":
 
 
 if option=="RTSP":
-    st.sidebar.text_input("請輸入RTSP連線端點")
-    st.sidebar.write("Example URL: rtsp://admin:12345@192.168.1.210:554/Streaming/Channels/101")
+    RTSP_endpoint=st.sidebar.text_input("請輸入RTSP連線端點")
+    st.sidebar.write("Example URL: rtsp://{username}:{passwoed}@{ip}:{port}/h264_ulaw.sdp") #support h264 video encoding
+    if RTSP_endpoint:
+        fourcc = cv2.VideoWriter_fourcc('H', '2', '6', '4')  
+
+        vid_cap = cv2.VideoCapture(RTSP_endpoint)
+
+        st_frame = st.empty()
+        while (vid_cap.isOpened()):
+            success, image = vid_cap.read()
+            if success:
+                annotated_frame=predict_every_frame(model_name,image)
+                st_frame.image(annotated_frame)
+            else:
+                vid_cap.release()
+                break
+    else:
+        st.toast('請輸入RTSP連線端點')
 
 
-if  option=="Youtube":
-    url=st.sidebar.text_input("請輸入Youtube影片url")
-    if url:
+
+if option=='Youtube':
+    url = st.sidebar.text_input("請輸入Youtube影片url")
+    buttom=st.sidebar.button("進行影片辨識")
+    if url and buttom :
+        st.subheader("Youtube原始影片")
+        st_player(url)
+
+        st.subheader("Youtube影片辨識結果")
         yt = YouTube(url)
-        stream = yt.streams.filter(file_extension="mp4", res=1080).get_highest_resolution()
-        # vid_cap = cv2.VideoCapture(stream.url)
-        st.subheader(f"{yt.title}")
-        st.video(stream.url)
+        stream = yt.streams.filter(res=720).first()
+        vid_cap = cv2.VideoCapture(stream.url)
+
+        st_frame = st.empty()
+        while (vid_cap.isOpened()):
+            success, image = vid_cap.read()
+            if success:
+                annotated_frame=predict_every_frame(model_name,image)
+                st_frame.image(annotated_frame)
+            else:
+                vid_cap.release()
+                break
+    elif url:
+        st.toast('點擊影像辨識按鈕開始分析!')
+    else:
+        st.toast('請輸入Youtube影片url')
+
