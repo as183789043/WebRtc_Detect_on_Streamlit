@@ -2,4 +2,4 @@ streamlit-webrtc
 opencv-contrib-python-headless
 ultralytics
 twilio
-pytube
+pytubefix
